@@ -7,7 +7,14 @@ require('dotenv').config()
 const Register = async(req,res)=>{
     try {
         
-        const {name,email,age,password} = req.body
+        const {name,email,age,password,Role} = req.body
+        
+        //create a user with role admin
+        const isAdmin = await User.findOne({Role: 'admin'});
+        if(!isAdmin){
+            const admin = await User.create({email:'admin@gmail.com', password:'123456', Role:'admin'})
+        }
+
         //verifier si l'utilisateur a déjà du compte au non
         const isfound = await User.findOne({email})
         if(isfound){
@@ -17,7 +24,8 @@ const Register = async(req,res)=>{
         //hashing password
         const salt = bcrypt.genSaltSync(10);
         const hashedPassword = await bcrypt.hash(password, salt);
-        const newUser = await User.create({name,age,email,password:hashedPassword })
+        
+        const newUser = await User.create({name,age,email,password:hashedPassword,Role })
         res.status(200).json({newUser, msg:'User created successfully'})
 
 
